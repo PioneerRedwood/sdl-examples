@@ -1,0 +1,54 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "blending build",
+            "type": "shell",
+            "command": "cl.exe",
+            "args": [
+                "/EHsc",
+                "${workspaceFolder}/blending/main.cpp",
+
+                "/Fe${workspaceFolder}/blending/build/blending.exe",
+                "/Fo${workspaceFolder}/blending/build/",
+
+                "/MTd", // static, debug runtime for libcpmtd.lib
+
+                // MSVC include
+                "/IC:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.40.33807/include",
+
+                // Windows include
+                "/IC:/Program Files (x86)/Windows Kits/10/Include/10.0.22621.0/cppwinrt",
+                "/IC:/Program Files (x86)/Windows Kits/10/Include/10.0.22621.0/shared",
+                "/IC:/Program Files (x86)/Windows Kits/10/Include/10.0.22621.0/ucrt",
+                "/IC:/Program Files (x86)/Windows Kits/10/Include/10.0.22621.0/um",
+                "/IC:/Program Files (x86)/Windows Kits/10/Include/10.0.22621.0/winrt",
+                
+                "/I${workspaceFolder}/include",
+                "/I${workspaceFolder}/libraries/SDL2/include",
+
+                // Library paths for the linker
+                "/link",
+                "/LIBPATH:/C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.40.33807/lib/x64/",   // MSVC library path
+                "/LIBPATH:/C:/Program Files (x86)/Windows Kits/10/Lib/10.0.22621.0/um/x64/",                             // Windows SDK libraries
+                "/LIBPATH:/C:/Program Files (x86)/Windows Kits/10/Lib/10.0.22621.0/ucrt/x64/",                           // Universal CRT libraries
+
+                // Essential Windows libraries
+                // "kernel32.lib",           // Core Windows functions
+                // "user32.lib",             // Windows user interface
+                // "gdi32.lib",              // Graphics Device Interface
+                // "advapi32.lib",           // Advanced Windows API
+                // "ucrt.lib",               // Universal C Runtime
+                // "libcpmt.lib"             // C++ Standard Library (static multi-threaded)
+                "libcpmtd.lib"             // C++ Standard Library (static multi-threaded)
+
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": ["$msCompile"],
+            "detail": "Generated task for MSVC"
+        }
+    ]
+}

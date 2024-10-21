@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "C++ Launch for Blending",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/blending/build/blending.exe",
+            "args": [
+                
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/blending",
+            "environment": [],
+            "console": "internalConsole",
+            "preLaunchTask": "blending build"
+        }
+    ]
+}
