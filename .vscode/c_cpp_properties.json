@@ -4,6 +4,9 @@
             "name": "Win64",
             "includePath": [
                 "${workspaceFolder}/**",
+                "${workspaceFolder}/lib/Windows/SDL2/include",
+                "${workspaceFolder}/blending",
+                "${workspaceFolder}/core",
                 "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.40.33807/include"
             ],
             "defines": [],

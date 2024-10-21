@@ -1,2 +1,5 @@
 # obj file
 *.obj
+
+# cmake build 
+build/*
