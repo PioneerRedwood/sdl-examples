@@ -1,9 +1,16 @@
 # SDL-Examples
 SDL2를 사용한 간단한 예제
 
-## Build on macOS
+## Build Instructions
+
+### macOS
 ```shell
-> cmake -G Xcode -B ./build . # build 아래에 CMakeLists.txt에 명시한대로 Xcode 프로젝트 생성
+> sh scripts/build-macos.sh
+```
+
+### Windows
+```shell
+> cmake -B ./build .
 ```
 
 ## Blending

@@ -4,16 +4,33 @@
             "name": "Win64",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/lib/Windows/SDL2/include",
+                "${workspaceFolder}/lib/SDL2/Windows/include",
+                "${workspaceFolder}/lib/SDL2/macOS/include",
                 "${workspaceFolder}/blending",
                 "${workspaceFolder}/core",
-                "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.40.33807/include"
+                "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.40.33807/include", // Modify MSVC include path
+                "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include" // Modify Xcode include path
             ],
             "defines": [],
             "compilerPath": "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.40.33807/bin/Hostx64/x64/cl.exe",
             "cStandard": "c11",
             "cppStandard": "c++17",
             "intelliSenseMode": "windows-msvc-x64"
+        }, 
+        {
+            "name": "macOS arm64",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/lib/SDL2/macOS/include",
+                "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include",
+                "${workspaceFolder}/blending",
+                "${workspaceFolder}/core"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/clang++",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "macos-clang-arm64" 
         }
     ],
     "version": 4
