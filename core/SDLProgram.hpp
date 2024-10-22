@@ -32,9 +32,9 @@ public:
     void handleEvent(SDL_Event* event);
 
 private:
-    SDL_Window* m_window = {};
+    SDL_Window* m_window = nullptr;
 
-    std::unique_ptr<SDLRenderer> m_renderer = {};
+    std::unique_ptr<SDLRenderer> m_renderer;
 
-    bool m_neededQuit = {};
+    bool m_neededQuit = false;
 };

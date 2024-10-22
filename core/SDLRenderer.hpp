@@ -6,6 +6,7 @@
 //------------------------------------------------------------------------------
 
 #pragma once
+
 #include <memory>
 #include <SDL.h>
 #include "TGA.hpp"
@@ -25,5 +26,5 @@ public:
     void present();
 
 private:
-    SDL_Renderer* m_renderer = {};
+    SDL_Renderer* m_renderer = nullptr;
 };

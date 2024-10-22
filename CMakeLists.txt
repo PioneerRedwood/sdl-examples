@@ -3,6 +3,10 @@ cmake_minimum_required(VERSION 3.19)
 # project name
 project(sdl-examples)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(CMAKE_BUILD_TYPE DEBUG)
 set(CMAKE_PREFIX_PATH "lib/Windows/SDL2/lib/x86" "lib/Windows/SDL2/lib/x64")
 
 # header files
@@ -21,6 +25,12 @@ set(SORUCES
     blending/main.cpp
 )
 
+# Create exec file
+add_executable(sdl-examples
+    ${HEADER_FILES}
+    ${SORUCES}
+)
+
 # Settings for platform
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     # Windows specific settings (Visual Studio)
@@ -28,46 +38,49 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 
     # Windows include path
     include_directories(
-        "lib/Windows/SDL2/include"
+        "lib/SDL2/Windows/include"
         "blending"
         "core"
     )
 
     # Windows link path
     link_directories(
-        "lib/Windows/SDL2/lib/x86"
-        "lib/Windows/SDL2/lib/x64"
+        "lib/SDL2/Windows/lib/x86"
+        "lib/SDL2/Windows/lib/x64"
     )
 
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     # macOS specific settings (Xcode)
     message(STATUS "Configuring for macOS (Xcode)")
 
-    # Create Xcode project
-    set(CMAKE_GENERATOR "Xcode" CACHE STRING "" FORCE)
-
     # macOS include path
     include_directories(
-        
+        "lib/SDL2/macOS/include"
+        "blending"
+        "core"
     )
 
     link_directories(
-        
+        "lib/SDL2/macOS/lib/arm64"
+    )
+
+    target_link_libraries(sdl-examples
+      "-framework CoreFoundation"
+      "-framework Foundation"
+      "-framework CoreAudioKit"
+      "-framework IOKit"
+      "-framework CoreGraphics"
+      "-framework MetalKit"
     )
 
 endif()
-
-# Create exec file
-add_executable(sdl-examples
-    ${HEADER_FILES}
-    ${SORUCES}
-)
 
 # link other libraries if needed
 target_link_libraries(sdl-examples
     # other libraries
     SDL2
     SDL2main
+    # ${MACOS_LIBRARIES}
 )
 
 # SDL2 DLL 복사

@@ -63,7 +63,7 @@ public:
     bool readFromFile(const char* filepath);
 
 private:
-    TGAHeader m_header = {};
+    TGAHeader m_header;
 
-    RGBA* m_pixel_data = {};
+    RGBA* m_pixel_data;
 };

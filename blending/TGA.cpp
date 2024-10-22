@@ -5,8 +5,8 @@
 // License: MIT License
 //------------------------------------------------------------------------------
 
-#include "TGA.hpp"
 #include <cstdio>
+#include "TGA.hpp"
 
 TGA::TGA() {}
 
@@ -17,26 +17,25 @@ TGA::~TGA() {
 }
 
 bool TGA::readFromFile(const char* filepath) {
-    FILE* fp = nullptr;
-    errno_t err = fopen_s(&fp, filepath, "rb");
-    if(err != 0) {
+    FILE* fp = fopen(filepath, "rb");
+    if(fp == nullptr) {
         // 파일 읽기 실패
         return false;
     }
 
     // Read header
-    err = fread_s(&m_header, sizeof(TGAHeader), sizeof(TGAHeader), 1, fp);
-    if(err == 0) {
+    size_t read = fread(&m_header, sizeof(TGAHeader), 1, fp);
+    if(read != sizeof(TGAHeader)) {
         // 파일 읽기 실패
         return false;
     }
-    m_pixel_data = new RGBA[m_header.width * m_header.height];
+    const size_t imageSize = m_header.width * m_header.height;
+    m_pixel_data = new RGBA[imageSize];
 
     // Read pixel data
-    err = fread_s(m_pixel_data, 
-        sizeof(RGBA) * m_header.width * m_header.height, 
-        sizeof(RGBA) * m_header.width * m_header.height, 1, fp);
-    if(err == 0) {
+    read = fread(m_pixel_data, 
+        sizeof(RGBA) * imageSize, 1, fp);
+    if(read != (sizeof(RGBA) * imageSize)) {
         return false;
     }
 
