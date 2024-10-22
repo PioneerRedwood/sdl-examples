@@ -6,14 +6,27 @@
 //------------------------------------------------------------------------------
 
 #include <cstdio>
+#include <functional>
 #include "TGA.hpp"
 
 TGA::TGA() {}
 
 TGA::~TGA() {
-    if(m_pixel_data) {
+    if(m_pixel_data != nullptr) {
         delete[] m_pixel_data;
     }
+    
+    if(m_texture != nullptr) {
+        SDL_DestroyTexture(m_texture);
+    }
+}
+
+const TGAHeader* TGA::header() const {
+    return (TGAHeader const*)&m_header;
+}
+
+SDL_Texture const* TGA::sdlTexture() const {
+    return m_texture;
 }
 
 bool TGA::readFromFile(const char* filepath) {
@@ -33,7 +46,7 @@ bool TGA::readFromFile(const char* filepath) {
     m_pixel_data = new RGBA[m_header.width * m_header.height];
 
     // Read pixel data
-    const size_t imageSize = sizeof(RGBA) * m_header.width * m_header.height;
+    const size_t imageSize = m_header.width * m_header.height * (m_header.pixel_depth / 8);
     read = fread(m_pixel_data, imageSize, 1, fp);
     if(read == 0) {
         return false;
@@ -45,15 +58,15 @@ bool TGA::readFromFile(const char* filepath) {
 }
 
 bool TGA::createTexture(SDL_Renderer *renderer) {
-    m_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STATIC, m_header.width, m_header.height);
-    void* pixels;
-    int pitch;
-    if(SDL_LockTexture(m_texture, nullptr, &pixels, &pitch) != 0) {
-        memcpy(pixels, m_pixel_data, sizeof(RGBA) * m_header.width * m_header.height);
-    } else {
+    m_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, 
+                                  SDL_TEXTUREACCESS_STATIC, m_header.width, m_header.height);
+    const int pitch = m_header.width * (m_header.pixel_depth / 8);
+    if(SDL_UpdateTexture(m_texture, nullptr, m_pixel_data, pitch) != 0) {
+        SDL_assert(false);
         return false;
     }
-    SDL_UnlockTexture(m_texture);
+    
+    // 만약 SDL_Texture로만 렌더링한다면 메모리 해제, 그렇지 않으면 메모리를 그대로 둬도 됨
     delete[] m_pixel_data;
     m_pixel_data = nullptr;
     

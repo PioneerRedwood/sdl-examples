@@ -20,6 +20,8 @@ public:
     ~SDLRenderer();
 
     SDL_Renderer* native();
+    
+    void clear();
 
     void drawTGA(std::unique_ptr<TGA>& tga, int x, int y);
 

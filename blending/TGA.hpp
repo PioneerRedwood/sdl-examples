@@ -60,6 +60,10 @@ public:
     TGA();
 
     ~TGA();
+    
+    const TGAHeader* header() const;
+    
+    SDL_Texture const* sdlTexture() const;
 
     bool readFromFile(const char* filepath);
     
