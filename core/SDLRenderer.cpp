@@ -27,31 +27,39 @@ void SDLRenderer::clear() {
     SDL_RenderClear(m_renderer);
 }
 
+void SDLRenderer::enableBlending(SDL_BlendMode blendMode) {
+    m_currentBlendMode = blendMode;
+}
+
+void SDLRenderer::disableBlending() {
+    m_currentBlendMode = SDL_BLENDMODE_NONE;
+}
+
 // TODO: Alpah Blend
 
 // TODO: Multiply Blend
 
 // TODO: Subtract Blend
 
-#define RENDER_WITH_TEX
-
 void SDLRenderer::drawTGA(std::unique_ptr<TGA>& tga, int x, int y) {
-#ifdef RENDER_WITH_TEX
-    // Render texture
     SDL_Rect rect = {0};
     rect.x = x, rect.y = y, rect.w = tga->header()->width, rect.h = tga->header()->height;
-    // Render TGA
-    SDL_RenderCopy(m_renderer, const_cast<SDL_Texture*>(tga->sdlTexture()), nullptr, &rect);
-#else
-    // Render pixels
-    for(int y = 0; y < tga->header()->height; ++y) {
-        for(int x = 0; x < tga->header()->width; ++x) {
-            
+    
+    switch(m_currentBlendMode) {
+        case SDL_BLENDMODE_ADD: {
+            break;
+        }
+        case SDL_BLENDMODE_MUL: {
+            break;
+        }
+        case SDL_BLENDMODE_: {
+            break;
+        }
+        default: {
+            SDL_RenderCopy(m_renderer, const_cast<SDL_Texture*>(tga->sdlTexture()), nullptr, &rect);
+            break;
         }
     }
-#endif
-
-    // Do blend!
 }
 
 void SDLRenderer::present() {

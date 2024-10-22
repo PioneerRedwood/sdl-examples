@@ -58,7 +58,7 @@ bool TGA::readFromFile(const char* filepath) {
 }
 
 bool TGA::createTexture(SDL_Renderer *renderer) {
-    m_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, 
+    m_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_BGRA32, 
                                   SDL_TEXTUREACCESS_STATIC, m_header.width, m_header.height);
     const int pitch = m_header.width * (m_header.pixel_depth / 8);
     if(SDL_UpdateTexture(m_texture, nullptr, m_pixel_data, pitch) != 0) {

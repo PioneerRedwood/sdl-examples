@@ -17,12 +17,12 @@ int main(int argc, char** argv) {
     // 리소스 로드
     std::unique_ptr<TGA> bg = std::make_unique<TGA>();
     // TODO: backgroud 리소스 잘못됐음 - 수정 바람
-//    if(bg->readFromFile(s_backgroundFilepath) == false) {
-//        return 1;
-//    }
-//    if(bg->createTexture(program->nativeRenderer()) == false) {
-//        return 1;
-//    }
+    if(bg->readFromFile(s_backgroundFilepath) == false) {
+        return 1;
+    }
+    if(bg->createTexture(program->nativeRenderer()) == false) {
+        return 1;
+    }
     std::unique_ptr<TGA> particle = std::make_unique<TGA>();
     if(particle->readFromFile(s_particleFilepath) == false) {
         return 1;
@@ -45,10 +45,12 @@ int main(int argc, char** argv) {
         program->renderer()->clear();
         
         // Draw background first
-//        program->renderer()->drawTGA(bg, 0, 0);
+        program->renderer()->drawTGA(bg, 0, 0);
         
         // Draw the instance next
         program->renderer()->drawTGA(particle, 100, 100);
+        
+        // TODO: Draw with alpha blending
 
         // Render
         program->renderer()->present();

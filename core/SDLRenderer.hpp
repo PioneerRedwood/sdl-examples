@@ -24,9 +24,15 @@ public:
     void clear();
 
     void drawTGA(std::unique_ptr<TGA>& tga, int x, int y);
+    
+    void enableBlending(SDL_BlendMode blendMode);
+    
+    void disableBlending();
 
     void present();
 
 private:
     SDL_Renderer* m_renderer = nullptr;
+    
+    SDL_BlendMode m_currentBlendMode = SDL_BLENDMODE_NONE;
 };
