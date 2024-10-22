@@ -8,6 +8,7 @@
 #pragma once
 
 #include <cstdint>
+#include <SDL.h>
 #include "RGBA.hpp"
 
 /**
@@ -61,9 +62,13 @@ public:
     ~TGA();
 
     bool readFromFile(const char* filepath);
+    
+    bool createTexture(SDL_Renderer* renderer);
 
 private:
     TGAHeader m_header;
 
-    RGBA* m_pixel_data;
+    RGBA* m_pixel_data = nullptr;
+    
+    SDL_Texture* m_texture = nullptr;
 };

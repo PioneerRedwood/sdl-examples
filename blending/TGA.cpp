@@ -25,21 +25,37 @@ bool TGA::readFromFile(const char* filepath) {
 
     // Read header
     size_t read = fread(&m_header, sizeof(TGAHeader), 1, fp);
-    if(read != sizeof(TGAHeader)) {
+    if(read == 0) {
         // 파일 읽기 실패
         return false;
     }
-    const size_t imageSize = m_header.width * m_header.height;
-    m_pixel_data = new RGBA[imageSize];
+    
+    m_pixel_data = new RGBA[m_header.width * m_header.height];
 
     // Read pixel data
-    read = fread(m_pixel_data, 
-        sizeof(RGBA) * imageSize, 1, fp);
-    if(read != (sizeof(RGBA) * imageSize)) {
+    const size_t imageSize = sizeof(RGBA) * m_header.width * m_header.height;
+    read = fread(m_pixel_data, imageSize, 1, fp);
+    if(read == 0) {
         return false;
     }
 
     fclose(fp);
 
+    return true;
+}
+
+bool TGA::createTexture(SDL_Renderer *renderer) {
+    m_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STATIC, m_header.width, m_header.height);
+    void* pixels;
+    int pitch;
+    if(SDL_LockTexture(m_texture, nullptr, &pixels, &pitch) != 0) {
+        memcpy(pixels, m_pixel_data, sizeof(RGBA) * m_header.width * m_header.height);
+    } else {
+        return false;
+    }
+    SDL_UnlockTexture(m_texture);
+    delete[] m_pixel_data;
+    m_pixel_data = nullptr;
+    
     return true;
 }

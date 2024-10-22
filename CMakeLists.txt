@@ -9,7 +9,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE Debug)
 set(CXX_FLAGS "-Wall")
 set(CMAKE_CXX_FLAGS "${CXX_FLAGS}")
-set(CMAKE_PREFIX_PATH "lib/Windows/SDL2/lib/x86" "lib/Windows/SDL2/lib/x64")
 
 # header files
 set(HEADER_FILES
@@ -89,16 +88,34 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     find_library(METAL Metal REQUIRED)  # Metal 추가
     find_library(APPKIT AppKit REQUIRED)  # AppKit 추가
 
-    # x86_64
-    add_library(lib-sdl2 STATIC IMPORTED)
-    set_target_properties(lib-sdl2
-        PROPERTIES IMPORTED_LOCATION
-        ${CMAKE_SOURCE_DIR}/lib/SDL2/macOS/lib/x86_64/libSDL2.a)
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64" OR CMAKE_SYSTEM_PROCESSOR MATCHES "i[3-6]86")
+        message(STATUS "Intel/AMD CPU detected")
+        # Intel/AMD specific settings
+        # x86_64
+        add_library(lib-sdl2 STATIC IMPORTED)
+        set_target_properties(lib-sdl2
+          PROPERTIES IMPORTED_LOCATION
+          ${CMAKE_SOURCE_DIR}/lib/SDL2/macOS/lib/x86_64/libSDL2.a)
 
-    add_library(lib-sdl2main STATIC IMPORTED)
-    set_target_properties(lib-sdl2main
-        PROPERTIES IMPORTED_LOCATION
-        ${CMAKE_SOURCE_DIR}/lib/SDL2/macOS/lib/x86_64/libSDL2main.a)
+        add_library(lib-sdl2main STATIC IMPORTED)
+        set_target_properties(lib-sdl2main
+            PROPERTIES IMPORTED_LOCATION
+            ${CMAKE_SOURCE_DIR}/lib/SDL2/macOS/lib/x86_64/libSDL2main.a)
+    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64" OR CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
+        message(STATUS "ARM CPU detected")
+        # ARM specific settings
+        add_library(lib-sdl2 STATIC IMPORTED)
+        set_target_properties(lib-sdl2
+            PROPERTIES IMPORTED_LOCATION
+            ${CMAKE_SOURCE_DIR}/lib/SDL2/macOS/lib/arm64/libSDL2.a)
+
+        add_library(lib-sdl2main STATIC IMPORTED)
+        set_target_properties(lib-sdl2main
+            PROPERTIES IMPORTED_LOCATION
+            ${CMAKE_SOURCE_DIR}/lib/SDL2/macOS/lib/arm64/libSDL2main.a)
+    else()
+        message(STATUS "Unknown CPU architecture: ${CMAKE_SYSTEM_PROCESSOR}")
+    endif()
 
     target_link_libraries(sdl-examples
         lib-sdl2

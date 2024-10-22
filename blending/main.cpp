@@ -4,7 +4,8 @@
 #include <SDL.h>
 #include "SDLProgram.hpp"
 
-constexpr auto s_filepath = "../resources/particle.tga";
+constexpr auto s_backgroundFilepath = "../../resources/overpass-graffiti.tga";
+constexpr auto s_particleFilepath = "../../resources/particle.tga";
 
 int main(int argc, char** argv) {
     std::unique_ptr<SDLProgram> program = std::make_unique<SDLProgram>();
@@ -14,8 +15,18 @@ int main(int argc, char** argv) {
     }
 
     // 리소스 로드
-    std::unique_ptr<TGA> tga = std::make_unique<TGA>();
-    if(tga->readFromFile(s_filepath) == false) {
+    std::unique_ptr<TGA> bg = std::make_unique<TGA>();
+    if(bg->readFromFile(s_backgroundFilepath) == false) {
+        return 1;
+    }
+    if(bg->createTexture(program->nativeRenderer()) == false) {
+        return 1;
+    }
+    std::unique_ptr<TGA> particle = std::make_unique<TGA>();
+    if(particle->readFromFile(s_particleFilepath) == false) {
+        return 1;
+    }
+    if(particle->createTexture(program->nativeRenderer()) == false) {
         return 1;
     }
 
@@ -29,7 +40,12 @@ int main(int argc, char** argv) {
         }
 
         // Update
-        program->renderer()->drawTGA(tga, 0, 0);
+        
+        // Draw background first
+        program->renderer()->drawTGA(bg, 0, 0);
+        
+        // Draw the instance next
+        program->renderer()->drawTGA(particle, 100, 100);
 
         // Render
         program->renderer()->present();
