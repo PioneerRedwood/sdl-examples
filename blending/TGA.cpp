@@ -25,6 +25,10 @@ const TGAHeader* TGA::header() const {
     return (TGAHeader const*)&m_header;
 }
 
+const RGBA* TGA::pixelData() const {
+    return m_pixel_data;
+}
+
 SDL_Texture const* TGA::sdlTexture() const {
     return m_texture;
 }

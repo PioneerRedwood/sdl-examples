@@ -30,6 +30,8 @@ public:
     void disableBlending();
 
     void present();
+    
+    void flush();
 
 private:
     SDL_Renderer* m_renderer = nullptr;

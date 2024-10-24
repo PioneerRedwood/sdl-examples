@@ -63,6 +63,8 @@ public:
     
     const TGAHeader* header() const;
     
+    const RGBA* pixelData() const;
+    
     SDL_Texture const* sdlTexture() const;
 
     bool readFromFile(const char* filepath);

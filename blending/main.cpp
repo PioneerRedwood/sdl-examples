@@ -4,8 +4,13 @@
 #include <SDL.h>
 #include "SDLProgram.hpp"
 
+#if 0
 constexpr auto s_backgroundFilepath = "../../resources/overpass-graffiti.tga";
-constexpr auto s_particleFilepath = "../../resources/particle.tga";
+constexpr auto s_particleFilepath = "../../resources/random.tga";
+#else
+constexpr auto s_backgroundFilepath = "../../resources/small-red-box.tga";
+constexpr auto s_particleFilepath = "../../resources/small-blue-area.tga";
+#endif
 
 int main(int argc, char** argv) {
     std::unique_ptr<SDLProgram> program = std::make_unique<SDLProgram>();
@@ -27,9 +32,9 @@ int main(int argc, char** argv) {
     if(particle->readFromFile(s_particleFilepath) == false) {
         return 1;
     }
-    if(particle->createTexture(program->nativeRenderer()) == false) {
-        return 1;
-    }
+//    if(particle->createTexture(program->nativeRenderer()) == false) {
+//        return 1;
+//    }
 
     // Main loop
     while(program->neededQuit() == false) {
@@ -45,15 +50,21 @@ int main(int argc, char** argv) {
         program->renderer()->clear();
         
         // Draw background first
+        program->renderer()->disableBlending();
         program->renderer()->drawTGA(bg, 0, 0);
+        // Before read pixels from render target, render present
+        program->renderer()->flush();
         
         // Draw the instance next
+        program->renderer()->enableBlending(SDL_BLENDMODE_BLEND);
         program->renderer()->drawTGA(particle, 100, 100);
         
         // TODO: Draw with alpha blending
 
         // Render
         program->renderer()->present();
+
+        // TODO: Add sleep
     }
 
     return 0;
