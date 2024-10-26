@@ -4,7 +4,7 @@
 #include <SDL.h>
 #include "SDLProgram.hpp"
 
-#if 0
+#if 1
 constexpr auto s_backgroundFilepath = "../../resources/overpass-graffiti.tga";
 constexpr auto s_particleFilepath = "../../resources/random.tga";
 #else
@@ -21,7 +21,6 @@ int main(int argc, char** argv) {
 
     // 리소스 로드
     std::unique_ptr<TGA> bg = std::make_unique<TGA>();
-    // TODO: backgroud 리소스 잘못됐음 - 수정 바람
     if(bg->readFromFile(s_backgroundFilepath) == false) {
         return 1;
     }
@@ -56,10 +55,20 @@ int main(int argc, char** argv) {
         program->renderer()->flush();
         
         // Draw the instance next
-        program->renderer()->enableBlending(SDL_BLENDMODE_BLEND);
-        program->renderer()->drawTGA(particle, 100, 100);
-        
         // TODO: Draw with alpha blending
+//        program->renderer()->enableBlending(SDL_BLENDMODE_BLEND);
+//        program->renderer()->drawTGA(particle, 100, 100);
+//        program->renderer()->flush();
+        
+        // TODO: Draw with additive blending
+        program->renderer()->enableBlending(SDL_BLENDMODE_ADD);
+        program->renderer()->drawTGA(particle, 200, 100);
+        program->renderer()->flush();
+        
+        // TODO: Draw with multiply blending
+//        program->renderer()->enableBlending(SDL_BLENDMODE_M UL);
+//        program->renderer()->drawTGA(particle, 300, 100);
+//        program->renderer()->flush();
 
         // Render
         program->renderer()->present();
