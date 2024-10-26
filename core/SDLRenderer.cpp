@@ -97,13 +97,6 @@ RGBA multiply(const RGBA& src, const RGBA& dst) {
 
 }  // namespace blend
 
-int readPixels(SDL_Renderer* renderer, const SDL_Rect* rect, Uint32 format, void* pixels, int pitch) {
-  int result;
-  SDL_Rect dst = {0, 0, rect->w, rect->h};
-  result = SDL_RenderReadPixels(renderer, &dst, format, pixels, pitch);
-  return result;
-}
-
 void SDLRenderer::drawTGA(std::unique_ptr<TGA>& tga, int x, int y) {
   SDL_Rect rect = {0};
   rect.x = x, rect.y = y, rect.w = tga->header()->width,
@@ -156,8 +149,8 @@ void SDLRenderer::drawWithBlending(std::unique_ptr<TGA>& tga, const SDL_Rect* re
   // TODO: 이 화면에서 가져오는 픽셀 데이터를 매번 할당, 해제해야 하는가? 다른 방법은?
   RGBA* pixels = new RGBA[tga->header()->width * tga->header()->height];
   const int pitch = tga->header()->width * sizeof(RGBA);
-  if (readPixels(m_renderer, rect, SDL_PIXELFORMAT_BGRA32, pixels,
-                  pitch) != 0) {
+
+  if(SDL_RenderReadPixels(m_renderer, rect, SDL_PIXELFORMAT_BGRA32, pixels, pitch) != 0) {
     std::cout << "readPixels failed " << SDL_GetError() << std::endl;
     return;
   }

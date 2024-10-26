@@ -8,7 +8,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_BUILD_TYPE Debug)
 set(CXX_FLAGS "-Wall")
-set(CMAKE_CXX_FLAGS "${CXX_FLAGS}")
 
 # header files
 set(HEADER_FILES
@@ -39,20 +38,43 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 
     # Windows include path
     include_directories(
-        "lib/SDL2/Windows/include"
+        ${CMAKE_SOURCE_DIR}/lib/SDL2/Windows/include
         "blending"
         "core"
     )
 
     # Windows link path
     link_directories(
-        "lib/SDL2/Windows/lib/x86"
-        "lib/SDL2/Windows/lib/x64"
+        ${CMAKE_SOURCE_DIR}/lib/SDL2/Windows/lib/x86
+        ${CMAKE_SOURCE_DIR}/lib/SDL2/Windows/lib/x64
     )
 
+    # Detect architecture
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8) # 64-bit
+        message(STATUS "64-bit architecture detected")
+        set(SDL_LIB_PATH "${CMAKE_SOURCE_DIR}/lib/SDL2/Windows/lib/x64")
+    elseif(CMAKE_SIZEOF_VOID_P EQUAL 4) # 32-bit
+        message(STATUS "32-bit architecture detected")
+        set(SDL_LIB_PATH "${CMAKE_SOURCE_DIR}/lib/SDL2/Windows/lib/x86")
+    else()
+        message(FATAL_ERROR "Unknown architecture detected: ${CMAKE_SYSTEM_PROCESSOR}")
+    endif()
+
+    # Define imported libraries based on architecture
+    add_library(lib-sdl2 STATIC IMPORTED)
+    set_target_properties(lib-sdl2
+        PROPERTIES IMPORTED_LOCATION "${SDL_LIB_PATH}/SDL2.lib"
+    )
+
+    add_library(lib-sdl2main STATIC IMPORTED)
+    set_target_properties(lib-sdl2main
+        PROPERTIES IMPORTED_LOCATION "${SDL_LIB_PATH}/SDL2main.lib"
+    )
+
+    # Link the SDL2 libraries
     target_link_libraries(sdl-examples
-        SDL2
-        SDL2main
+        lib-sdl2
+        lib-sdl2main
     )
 
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
@@ -141,7 +163,7 @@ endif()
 
 # SDL2 DLL 복사
 if(WIN32)
-    set(SDL2_DLL "${CMAKE_CURRENT_SOURCE_DIR}/lib/Windows/SDL2/lib/x86/SDL2.dll")
+    set(SDL2_DLL ${CMAKE_SOURCE_DIR}/lib/SDL2/Windows/lib/x86/SDL2.dll)
     add_custom_command(TARGET sdl-examples POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "${SDL2_DLL}" $<TARGET_FILE_DIR:sdl-examples>)

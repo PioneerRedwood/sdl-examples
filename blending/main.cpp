@@ -4,12 +4,22 @@
 #include <SDL.h>
 #include "SDLProgram.hpp"
 
+#if _WIN32
+#if 1
+constexpr auto s_backgroundFilepath = "../resources/overpass-graffiti.tga";
+constexpr auto s_particleFilepath = "../resources/random.tga";
+#else
+constexpr auto s_backgroundFilepath = "../../resources/small-red-box.tga";
+constexpr auto s_particleFilepath = "../../resources/small-blue-area.tga";
+#endif
+#else
 #if 1
 constexpr auto s_backgroundFilepath = "../../resources/overpass-graffiti.tga";
 constexpr auto s_particleFilepath = "../../resources/random.tga";
 #else
 constexpr auto s_backgroundFilepath = "../../resources/small-red-box.tga";
 constexpr auto s_particleFilepath = "../../resources/small-blue-area.tga";
+#endif
 #endif
 
 int main(int argc, char** argv) {
@@ -22,13 +32,16 @@ int main(int argc, char** argv) {
     // 리소스 로드
     std::unique_ptr<TGA> bg = std::make_unique<TGA>();
     if(bg->readFromFile(s_backgroundFilepath) == false) {
+        std::cout << "File read failed " << s_backgroundFilepath << std::endl;
         return 1;
     }
     if(bg->createTexture(program->nativeRenderer()) == false) {
+        std::cout << "Create texture failed " << s_backgroundFilepath << std::endl;
         return 1;
     }
     std::unique_ptr<TGA> particle = std::make_unique<TGA>();
     if(particle->readFromFile(s_particleFilepath) == false) {
+        std::cout << "File read failed " << s_particleFilepath << std::endl;
         return 1;
     }
 //    if(particle->createTexture(program->nativeRenderer()) == false) {
