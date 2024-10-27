@@ -8,6 +8,7 @@
 #include "SDLRenderer.hpp"
 
 #include <iostream>  // ste::cout long
+#include <algorithm>
 
 SDLRenderer::SDLRenderer(SDL_Window* window) {
   // TODO: 과연 생성자에 결과를 확인해야 할수도 있는 인스턴스를 초기화하는 것이
@@ -45,10 +46,17 @@ unsigned logCount = 16;
 /// dstA = srcA + (dstA * (1-srcA))
 RGBA alpha(const RGBA& src, const RGBA& dst) {
   RGBA c = {0};
-  c.r = (uint8_t)(((((float)src.r / 255) * ((float)src.a / 255)) + (((float)dst.r / 255) * (1.0f - ((float)src.a / 255)))) * 255);
-  c.g = (uint8_t)(((((float)src.g / 255) * ((float)src.a / 255)) + (((float)dst.g / 255) * (1.0f - ((float)src.a / 255)))) * 255);
-  c.b = (uint8_t)(((((float)src.b / 255) * ((float)src.a / 255)) + (((float)dst.b / 255) * (1.0f - ((float)src.a / 255)))) * 255);
-  c.a = (uint8_t)((((float)src.a / 255) + (((float)dst.a / 255) * (1.0 - ((float)src.a / 255)))) * 255);
+  // src와 dst의 알파 값 미리 계산
+  float srcAlpha = src.a / 255.0f;
+  float invSrcAlpha = 1.0f - srcAlpha;
+
+  // RGB 채널에 대한 알파 블렌딩 계산 및 255로 제한
+  c.r = (uint8_t)(std::min(255.0f, (src.r * srcAlpha + dst.r * invSrcAlpha)));
+  c.g = (uint8_t)(std::min(255.0f, (src.g * srcAlpha + dst.g * invSrcAlpha)));
+  c.b = (uint8_t)(std::min(255.0f, (src.b * srcAlpha + dst.b * invSrcAlpha)));
+
+  // Alpha 채널 블렌딩 계산 및 255로 제한
+  c.a = (uint8_t)(std::min(255.0f, (srcAlpha * 255 + dst.a * invSrcAlpha)));
 
   if(logCount > 0) {
     snprintf(logBuf, 512, "src: %.3f %.3f %.3f %.3f & dst %.3f %.3f %.3f %.3f = %.3f %.3f %.3f %.3f \n",
@@ -66,9 +74,9 @@ RGBA alpha(const RGBA& src, const RGBA& dst) {
 /// dstA = dstA
 RGBA additive(const RGBA& src, const RGBA& dst) {
   RGBA c = {0};
-  c.r = (uint8_t)( (((float)src.r / 255) * ((float)src.a / 255) + ((float)dst.r / 255)) * 255 );
-  c.g = (uint8_t)( (((float)src.g / 255) * ((float)src.a / 255) + ((float)dst.g / 255)) * 255 );
-  c.b = (uint8_t)( (((float)src.b / 255) * ((float)src.a / 255) + ((float)dst.b / 255)) * 255 );
+  c.r = (uint8_t)(std::min(255.0f, ((src.r * src.a / 255.0f) + dst.r)));
+  c.g = (uint8_t)(std::min(255.0f, ((src.g * src.a / 255.0f) + dst.g)));
+  c.b = (uint8_t)(std::min(255.0f, ((src.b * src.a / 255.0f) + dst.b)));
   c.a = dst.a;
     
   if(logCount > 0) {
@@ -84,14 +92,33 @@ RGBA additive(const RGBA& src, const RGBA& dst) {
 }
 
 /// color multiply
-/// dstRGB = (srcRGB * dstRGB) + (dstRGB * (1-srcA))
+/// dstRGB = (srcRGB * dstRGB) + (dstRGB * (1 - srcA))
 /// dstA = dstA
 RGBA multiply(const RGBA& src, const RGBA& dst) {
-  RGBA c = {0};
-  c.r = (uint8_t)( (((float)src.r / 255) * ((float)dst.r / 255) + (((float)dst.r / 255) * (1.0f - ((float)src.r / 255)))) * 255 );
-  c.g = (uint8_t)( (((float)src.g / 255) * ((float)dst.g / 255) + (((float)dst.g / 255) * (1.0f - ((float)src.g / 255)))) * 255 );
-  c.b = (uint8_t)( (((float)src.b / 255) * ((float)dst.b / 255) + (((float)dst.b / 255) * (1.0f - ((float)src.b / 255)))) * 255 );
+  RGBA c = { 0 };
+
+  // src의 알파 값과 (1 - srcAlpha) 미리 계산
+  float srcAlpha = src.a / 255.0f;
+  float invSrcAlpha = 1.0f - srcAlpha;
+
+  // RGB 채널에 대한 color multiply 연산 및 255로 제한
+  c.r = (uint8_t)(std::min(255.0f, (src.r * dst.r / 255.0f + dst.r * invSrcAlpha)));
+  c.g = (uint8_t)(std::min(255.0f, (src.g * dst.g / 255.0f + dst.g * invSrcAlpha)));
+  c.b = (uint8_t)(std::min(255.0f, (src.b * dst.b / 255.0f + dst.b * invSrcAlpha)));
+
+  // 알파 값은 변경하지 않음
   c.a = dst.a;
+
+  // 디버깅을 위한 로그 출력
+  if (logCount > 0) {
+    snprintf(logBuf, 512, "src: %.3f %.3f %.3f %.3f & dst %.3f %.3f %.3f %.3f = %.3f %.3f %.3f %.3f \n",
+      ((float)src.r / 255), ((float)src.g / 255), ((float)src.b / 255), ((float)src.a / 255),
+      ((float)dst.r / 255), ((float)dst.g / 255), ((float)dst.b / 255), ((float)dst.a / 255),
+      ((float)c.r / 255), ((float)c.g / 255), ((float)c.b / 255), ((float)c.a / 255));
+    printf("%.2d %s", logCount, logBuf);
+    logCount--;
+  }
+
   return c;
 }
 
@@ -163,7 +190,7 @@ void SDLRenderer::drawWithBlending(std::unique_ptr<TGA>& tga, const SDL_Rect* re
 
       SDL_SetRenderDrawColor(m_renderer, blended.b, blended.g, blended.r,
                               blended.a);
-      SDL_RenderDrawPoint(m_renderer, w, h);
+      SDL_RenderDrawPoint(m_renderer, rect->x + w, rect->y + h);
     }
   }
   delete[] pixels;

@@ -19,7 +19,7 @@ bool SDLProgram::init(int width, int height) {
         return false;
     }
 
-    m_window = SDL_CreateWindow("SDL-Examples", 0, 0, width, height, SDL_WINDOW_RESIZABLE);
+    m_window = SDL_CreateWindow("SDL-Examples", 100, 100, width, height, SDL_WINDOW_RESIZABLE);
     if(m_window == nullptr) {
         SDL_assert(false);
         return false;

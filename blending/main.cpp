@@ -7,7 +7,7 @@
 #if _WIN32
 #if 1
 constexpr auto s_backgroundFilepath = "../resources/overpass-graffiti.tga";
-constexpr auto s_particleFilepath = "../resources/random.tga";
+constexpr auto s_particleFilepath = "../resources/particle.tga";
 #else
 constexpr auto s_backgroundFilepath = "../../resources/small-red-box.tga";
 constexpr auto s_particleFilepath = "../../resources/small-blue-area.tga";
@@ -15,7 +15,7 @@ constexpr auto s_particleFilepath = "../../resources/small-blue-area.tga";
 #else
 #if 1
 constexpr auto s_backgroundFilepath = "../../resources/overpass-graffiti.tga";
-constexpr auto s_particleFilepath = "../../resources/random.tga";
+constexpr auto s_particleFilepath = "../../resources/particle.tga";
 #else
 constexpr auto s_backgroundFilepath = "../../resources/small-red-box.tga";
 constexpr auto s_particleFilepath = "../../resources/small-blue-area.tga";
@@ -69,19 +69,19 @@ int main(int argc, char** argv) {
         
         // Draw the instance next
         // TODO: Draw with alpha blending
-//        program->renderer()->enableBlending(SDL_BLENDMODE_BLEND);
-//        program->renderer()->drawTGA(particle, 100, 100);
-//        program->renderer()->flush();
+        program->renderer()->enableBlending(SDL_BLENDMODE_BLEND);
+        program->renderer()->drawTGA(particle, 0, 0);
+        program->renderer()->flush();
         
         // TODO: Draw with additive blending
         program->renderer()->enableBlending(SDL_BLENDMODE_ADD);
-        program->renderer()->drawTGA(particle, 200, 100);
+        program->renderer()->drawTGA(particle, 128, 128);
         program->renderer()->flush();
         
         // TODO: Draw with multiply blending
-//        program->renderer()->enableBlending(SDL_BLENDMODE_M UL);
-//        program->renderer()->drawTGA(particle, 300, 100);
-//        program->renderer()->flush();
+        program->renderer()->enableBlending(SDL_BLENDMODE_MUL);
+        program->renderer()->drawTGA(particle, 256, 256);
+        program->renderer()->flush();
 
         // Render
         program->renderer()->present();
