@@ -5,27 +5,17 @@
 #include "SDLProgram.hpp"
 
 #if _WIN32
-#if 1
-constexpr auto s_backgroundFilepath = "../resources/overpass-graffiti.tga";
-constexpr auto s_particleFilepath = "../resources/particle.tga";
+constexpr auto s_backgroundFilepath = "../resources/bg.tga";
+constexpr auto s_particleFilepath = "../resources/particle2.tga";
 #else
-constexpr auto s_backgroundFilepath = "../../resources/small-red-box.tga";
-constexpr auto s_particleFilepath = "../../resources/small-blue-area.tga";
-#endif
-#else
-#if 1
-constexpr auto s_backgroundFilepath = "../../resources/overpass-graffiti.tga";
-constexpr auto s_particleFilepath = "../../resources/particle.tga";
-#else
-constexpr auto s_backgroundFilepath = "../../resources/small-red-box.tga";
-constexpr auto s_particleFilepath = "../../resources/small-blue-area.tga";
-#endif
+constexpr auto s_backgroundFilepath = "../../resources/bg.tga";
+constexpr auto s_particleFilepath = "../../resources/particle2.tga";
 #endif
 
 int main(int argc, char** argv) {
     std::unique_ptr<SDLProgram> program = std::make_unique<SDLProgram>();
 
-    if(program->init(640, 480) == false) {
+    if(program->init(1280, 960) == false) {
         return 1;
     }
 
@@ -44,9 +34,11 @@ int main(int argc, char** argv) {
         std::cout << "File read failed " << s_particleFilepath << std::endl;
         return 1;
     }
-//    if(particle->createTexture(program->nativeRenderer()) == false) {
-//        return 1;
-//    }
+    if(particle->createTexture(program->nativeRenderer()) == false) {
+        return 1;
+    }
+    auto& renderer = program->renderer();
+    auto* nativeRenderer = program->nativeRenderer();
 
     // Main loop
     while(program->neededQuit() == false) {
@@ -58,35 +50,65 @@ int main(int argc, char** argv) {
         }
 
         // Update
-        SDL_SetRenderDrawColor(program->nativeRenderer(), 255, 255, 255, 255);
-        program->renderer()->clear();
+        SDL_SetRenderDrawColor(nativeRenderer, 255, 255, 255, 255);
+        renderer->clear();
         
         // Draw background first
-        program->renderer()->disableBlending();
-        program->renderer()->drawTGA(bg, 0, 0);
+        renderer->disableBlending();
+        renderer->drawTGA(bg, 0, 0);
         // Before read pixels from render target, render present
-        program->renderer()->flush();
+        renderer->flush();
         
-        // Draw the instance next
-        // TODO: Draw with alpha blending
-        program->renderer()->enableBlending(SDL_BLENDMODE_BLEND);
-        program->renderer()->drawTGA(particle, 0, 0);
-        program->renderer()->flush();
-        
-        // TODO: Draw with additive blending
-        program->renderer()->enableBlending(SDL_BLENDMODE_ADD);
-        program->renderer()->drawTGA(particle, 128, 128);
-        program->renderer()->flush();
-        
-        // TODO: Draw with multiply blending
-        program->renderer()->enableBlending(SDL_BLENDMODE_MUL);
-        program->renderer()->drawTGA(particle, 256, 256);
-        program->renderer()->flush();
+        // 픽셀로 그리기
+        {
+          // Draw the instance next
+          // TODO: Draw with alpha blending
+          renderer->enableBlending(SDL_BLENDMODE_BLEND);
+          renderer->drawTGA(particle, 0, 0);
+          renderer->flush();
+
+          // TODO: Draw with additive blending
+          renderer->enableBlending(SDL_BLENDMODE_ADD);
+          renderer->drawTGA(particle, 256, 0);
+          renderer->flush();
+
+          // TODO: Draw with multiply blending
+          renderer->enableBlending(SDL_BLENDMODE_MUL);
+          renderer->drawTGA(particle, 512, 0);
+          renderer->flush();
+        }
+
+        //SDL_SetTextureBlendMode(const_cast<SDL_Texture*>(bg->sdlTexture()), SDL_BLENDMODE_NONE);
+        //SDL_RenderCopy(nativeRenderer, const_cast<SDL_Texture*>(bg->sdlTexture()), nullptr, nullptr);
+        //SDL_RenderFlush(nativeRenderer);
+
+        // 텍스처로 그리기
+        {
+          SDL_Rect rect = { 0 };
+          rect.y = 256;
+          rect.w = particle->header()->width, rect.h = particle->header()->height;
+          SDL_SetTextureBlendMode(const_cast<SDL_Texture*>(particle->sdlTexture()), SDL_BLENDMODE_BLEND);
+          SDL_RenderCopy(nativeRenderer, const_cast<SDL_Texture*>(particle->sdlTexture()),
+            nullptr, &rect);
+          SDL_RenderFlush(nativeRenderer);
+
+          rect.x = 256;
+          SDL_SetTextureBlendMode(const_cast<SDL_Texture*>(particle->sdlTexture()), SDL_BLENDMODE_ADD);
+          SDL_RenderCopy(nativeRenderer, const_cast<SDL_Texture*>(particle->sdlTexture()),
+            nullptr, &rect);
+          SDL_RenderFlush(nativeRenderer);
+
+          rect.x = 512;
+          SDL_SetTextureBlendMode(const_cast<SDL_Texture*>(particle->sdlTexture()), SDL_BLENDMODE_MUL);
+          SDL_RenderCopy(nativeRenderer, const_cast<SDL_Texture*>(particle->sdlTexture()),
+            nullptr, &rect);
+          SDL_RenderFlush(nativeRenderer);
+        }
 
         // Render
         program->renderer()->present();
 
-        // TODO: Add sleep
+        
     }
 
     return 0;

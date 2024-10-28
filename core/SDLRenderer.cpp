@@ -39,24 +39,27 @@ struct RGBAf {
 
 char logBuf[512];
 
-unsigned logCount = 16;
+unsigned logCount = 0;
 
 /// Alpha blend
 /// dstRGB = (srcRGB * srcA) + (dstRGB * (1-srcA))
 /// dstA = srcA + (dstA * (1-srcA))
 RGBA alpha(const RGBA& src, const RGBA& dst) {
   RGBA c = {0};
+  RGBAf s = {
+    (float)src.r / 255.0f, (float)src.g / 255.0f, (float)src.b / 255.0f, (float)src.a / 255.0f
+  };
+  RGBAf d = {
+    (float)dst.r / 255.0f, (float)dst.g / 255.0f, (float)dst.b / 255.0f, (float)dst.a / 255.0f
+  };
+
   // src와 dst의 알파 값 미리 계산
-  float srcAlpha = src.a / 255.0f;
-  float invSrcAlpha = 1.0f - srcAlpha;
+  float invSrcAlpha = 1.0f - s.a;
 
-  // RGB 채널에 대한 알파 블렌딩 계산 및 255로 제한
-  c.r = (uint8_t)(std::min(255.0f, (src.r * srcAlpha + dst.r * invSrcAlpha)));
-  c.g = (uint8_t)(std::min(255.0f, (src.g * srcAlpha + dst.g * invSrcAlpha)));
-  c.b = (uint8_t)(std::min(255.0f, (src.b * srcAlpha + dst.b * invSrcAlpha)));
-
-  // Alpha 채널 블렌딩 계산 및 255로 제한
-  c.a = (uint8_t)(std::min(255.0f, (srcAlpha * 255 + dst.a * invSrcAlpha)));
+  c.r = (uint8_t)(std::min((s.r * s.a + d.r * invSrcAlpha) * 255.0f, 255.0f));
+  c.g = (uint8_t)(std::min((s.g * s.a + d.g * invSrcAlpha) * 255.0f, 255.0f));
+  c.b = (uint8_t)(std::min((s.b * s.a + d.b * invSrcAlpha) * 255.0f, 255.0f));
+  c.a = (uint8_t)(std::min((s.a + (d.a * invSrcAlpha)) * 255.0f, 255.0f));
 
   if(logCount > 0) {
     snprintf(logBuf, 512, "src: %.3f %.3f %.3f %.3f & dst %.3f %.3f %.3f %.3f = %.3f %.3f %.3f %.3f \n",
@@ -74,19 +77,17 @@ RGBA alpha(const RGBA& src, const RGBA& dst) {
 /// dstA = dstA
 RGBA additive(const RGBA& src, const RGBA& dst) {
   RGBA c = {0};
-  c.r = (uint8_t)(std::min(255.0f, ((src.r * src.a / 255.0f) + dst.r)));
-  c.g = (uint8_t)(std::min(255.0f, ((src.g * src.a / 255.0f) + dst.g)));
-  c.b = (uint8_t)(std::min(255.0f, ((src.b * src.a / 255.0f) + dst.b)));
+  RGBAf s = {
+    (float)src.r / 255.0f, (float)src.g / 255.0f, (float)src.b / 255.0f, (float)src.a / 255.0f
+  };
+  RGBAf d = {
+    (float)dst.r / 255.0f, (float)dst.g / 255.0f, (float)dst.b / 255.0f, (float)dst.a / 255.0f
+  };
+
+  c.r = (uint8_t)(std::min(((s.r * s.a) + d.r) * 255.0f, 255.0f));
+  c.g = (uint8_t)(std::min(((s.g * s.a) + d.g) * 255.0f, 255.0f));
+  c.b = (uint8_t)(std::min(((s.b * s.a) + d.b) * 255.0f, 255.0f));
   c.a = dst.a;
-    
-  if(logCount > 0) {
-    snprintf(logBuf, 512, "src: %.3f %.3f %.3f %.3f & dst %.3f %.3f %.3f %.3f = %.3f %.3f %.3f %.3f \n",
-      ((float)src.r / 255), ((float)src.g / 255), ((float)src.b / 255), ((float)src.a / 255),
-      ((float)dst.r / 255), ((float)dst.g / 255), ((float)dst.b / 255), ((float)dst.a / 255),
-      ((float)c.r / 255), ((float)c.g / 255), ((float)c.b / 255), ((float)c.a / 255));
-    printf("%.2d %s", logCount, logBuf);
-    logCount--;
-  }
 
   return c;
 }
@@ -101,23 +102,20 @@ RGBA multiply(const RGBA& src, const RGBA& dst) {
   float srcAlpha = src.a / 255.0f;
   float invSrcAlpha = 1.0f - srcAlpha;
 
+  RGBAf s = {
+    (float)src.r / 255.0f, (float)src.g / 255.0f, (float)src.b / 255.0f, (float)src.a / 255.0f
+  };
+  RGBAf d = {
+    (float)dst.r / 255.0f, (float)dst.g / 255.0f, (float)dst.b / 255.0f, (float)dst.a / 255.0f
+  };
+
   // RGB 채널에 대한 color multiply 연산 및 255로 제한
-  c.r = (uint8_t)(std::min(255.0f, (src.r * dst.r / 255.0f + dst.r * invSrcAlpha)));
-  c.g = (uint8_t)(std::min(255.0f, (src.g * dst.g / 255.0f + dst.g * invSrcAlpha)));
-  c.b = (uint8_t)(std::min(255.0f, (src.b * dst.b / 255.0f + dst.b * invSrcAlpha)));
+  c.r = (uint8_t)(std::min(((s.r * d.r) + (d.r * invSrcAlpha)) * 255.0f, 255.0f));
+  c.g = (uint8_t)(std::min(((s.g * d.g) + (d.g * invSrcAlpha)) * 255.0f, 255.0f));
+  c.b = (uint8_t)(std::min(((s.b * d.b) + (d.b * invSrcAlpha)) * 255.0f, 255.0f));
 
   // 알파 값은 변경하지 않음
   c.a = dst.a;
-
-  // 디버깅을 위한 로그 출력
-  if (logCount > 0) {
-    snprintf(logBuf, 512, "src: %.3f %.3f %.3f %.3f & dst %.3f %.3f %.3f %.3f = %.3f %.3f %.3f %.3f \n",
-      ((float)src.r / 255), ((float)src.g / 255), ((float)src.b / 255), ((float)src.a / 255),
-      ((float)dst.r / 255), ((float)dst.g / 255), ((float)dst.b / 255), ((float)dst.a / 255),
-      ((float)c.r / 255), ((float)c.g / 255), ((float)c.b / 255), ((float)c.a / 255));
-    printf("%.2d %s", logCount, logBuf);
-    logCount--;
-  }
 
   return c;
 }
@@ -129,55 +127,24 @@ void SDLRenderer::drawTGA(std::unique_ptr<TGA>& tga, int x, int y) {
   rect.x = x, rect.y = y, rect.w = tga->header()->width,
   rect.h = tga->header()->height;
 
-  switch (m_currentBlendMode) {
-    case SDL_BLENDMODE_BLEND: {
-      drawWithBlending(tga, &rect);
-      break;
-    }
-    case SDL_BLENDMODE_ADD: {
-      drawWithBlending(tga, &rect);
-      break;
-    }
-    case SDL_BLENDMODE_MUL: {
-      drawWithBlending(tga, &rect);
-      break;
-    }
-    default: {
-      SDL_RenderCopy(m_renderer, const_cast<SDL_Texture*>(tga->sdlTexture()),
-                     nullptr, &rect);
-      break;
-    }
+  if (m_currentBlendMode == SDL_BLENDMODE_NONE) {
+    SDL_RenderCopy(m_renderer, const_cast<SDL_Texture*>(tga->sdlTexture()),
+      nullptr, &rect);
+    return;
   }
-}
 
-void SDLRenderer::drawWithBlending(std::unique_ptr<TGA>& tga, const SDL_Rect* rect) {
   if (tga->pixelData() == nullptr) {
     std::cout << "TGA does not have any available pixels \n";
     return;
   }
-  auto blendFunc = [](SDL_BlendMode blendMode, const RGBA& s, const RGBA& d)->RGBA {
-    switch(blendMode) {
-      case SDL_BLENDMODE_BLEND: {
-        return blend::alpha(s, d);
-        break;
-      }
-      case SDL_BLENDMODE_ADD: {
-        return blend::additive(s, d);
-        break;
-      }
-      case SDL_BLENDMODE_MUL: {
-        return blend::multiply(s, d);
-        break;
-      }
-      default: return s;
-    }
-  };
 
-  // TODO: 이 화면에서 가져오는 픽셀 데이터를 매번 할당, 해제해야 하는가? 다른 방법은?
   RGBA* pixels = new RGBA[tga->header()->width * tga->header()->height];
+  if (pixels == nullptr) {
+    return;
+  }
   const int pitch = tga->header()->width * sizeof(RGBA);
 
-  if(SDL_RenderReadPixels(m_renderer, rect, SDL_PIXELFORMAT_BGRA32, pixels, pitch) != 0) {
+  if (SDL_RenderReadPixels(m_renderer, &rect, SDL_PIXELFORMAT_BGRA32, pixels, pitch) != 0) {
     std::cout << "readPixels failed " << SDL_GetError() << std::endl;
     return;
   }
@@ -186,11 +153,29 @@ void SDLRenderer::drawWithBlending(std::unique_ptr<TGA>& tga, const SDL_Rect* re
     for (int w = 0; w < tga->header()->width; ++w) {
       int offset = h * tga->header()->width + w;
       // TODO: Do the math here
-      RGBA blended = blendFunc(m_currentBlendMode, tgaPixels[offset], pixels[offset]);
+      RGBA blended = { 0 };
+      switch (m_currentBlendMode) {
+      case SDL_BLENDMODE_BLEND: {
+        blended = blend::alpha(tgaPixels[offset], pixels[offset]);
+        break;
+      }
+      case SDL_BLENDMODE_ADD: {
+        blended = blend::additive(tgaPixels[offset], pixels[offset]);
+        break;
+      }
+      case SDL_BLENDMODE_MUL: {
+        blended = blend::multiply(tgaPixels[offset], pixels[offset]);
+        break;
+      }
+      default: {
+        blended = tgaPixels[offset];
+        break;
+      }
+      }
 
       SDL_SetRenderDrawColor(m_renderer, blended.b, blended.g, blended.r,
-                              blended.a);
-      SDL_RenderDrawPoint(m_renderer, rect->x + w, rect->y + h);
+        blended.a);
+      SDL_RenderDrawPoint(m_renderer, rect.x + w, rect.y + h);
     }
   }
   delete[] pixels;

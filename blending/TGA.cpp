@@ -71,8 +71,8 @@ bool TGA::createTexture(SDL_Renderer *renderer) {
     }
     
     // 만약 SDL_Texture로만 렌더링한다면 메모리 해제, 그렇지 않으면 메모리를 그대로 둬도 됨
-    delete[] m_pixel_data;
-    m_pixel_data = nullptr;
+    //delete[] m_pixel_data;
+    //m_pixel_data = nullptr;
     
     return true;
 }

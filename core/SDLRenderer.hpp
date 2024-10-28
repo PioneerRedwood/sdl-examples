@@ -24,8 +24,6 @@ public:
     void clear();
 
     void drawTGA(std::unique_ptr<TGA>& tga, int x, int y);
-
-    void drawWithBlending(std::unique_ptr<TGA>& tga, const SDL_Rect* rect);
     
     void enableBlending(SDL_BlendMode blendMode);
     
